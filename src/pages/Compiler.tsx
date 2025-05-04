@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
+import { apiRequest } from '../api/apiRequest';
 
 const CompilerPage: React.FC = () => {
   const [code, setCode] = useState(`public class Solution { 
@@ -19,10 +20,11 @@ const CompilerPage: React.FC = () => {
     };
     
     try {
-      const { data } = await axios.post('http://localhost:8080/api/execute', payload);
+      const data = await apiRequest('http://localhost:8080/api/execute', "POST" ,payload);
       setOutput(data); // Process backend response
     } catch (error) {
         if (error instanceof Error) {
+          console.log('error occured while executing');
           console.error(error.message); // Safely access the error's message property
         } else {
           console.error('An unknown error occurred');

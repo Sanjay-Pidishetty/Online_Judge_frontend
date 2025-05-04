@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -8,9 +9,12 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
   const navigate = useNavigate();
+  const {setToken} = useAuth();
 
   const handleLogout = () => {
     onLogout(); // Update authentication state
+    localStorage.removeItem("authToken");
+    setToken(null);
     navigate('/'); // Navigate to the home page
   };
 
@@ -20,6 +24,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
       <div>
         {isAuthenticated ? (
           <>
+            <Link to="/welcome">
+              <button style={{ padding: '0.5rem 1rem', cursor: 'pointer', marginRight: '1rem' }}>Home</button>
+            </Link>
             <Link to="/compiler">
               <button style={{ padding: '0.5rem 1rem', cursor: 'pointer', marginRight: '1rem' }}>Compiler</button>
             </Link>

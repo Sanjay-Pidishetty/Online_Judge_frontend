@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LoginPageProps {
   onLogin: () => void;
 }
 
+interface LoginResponse {
+  token: string;
+}
+
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { setToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async () => {
     try {
@@ -18,13 +25,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.text(); // Assuming API returns a string
-      if (data === 'Login successful') {
-        onLogin(); // Update authentication state in App
-        navigate('/welcome'); // Navigate to the home page
-      } else {
-        alert('Invalid credentials. Please try again.');
+      if (!response.ok) {
+        throw new Error('Login failed!');
       }
+
+      const data: LoginResponse = await response.json();
+      const token = data.token;
+
+      localStorage.setItem('authToken', token);
+      setToken(token);
+
+      // Redirect to the page the user was trying to access or to '/welcome'
+      const from = location.state?.from?.pathname || '/welcome';
+      navigate(from);
+      onLogin();
     } catch (error) {
       console.error('Error logging in:', error);
       alert('Something went wrong. Please try again later.');
